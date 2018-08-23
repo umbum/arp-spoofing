@@ -1,18 +1,22 @@
-all: arp-spoofing
+CC       := g++
+LDLIBS   := -lpcap
+# CFLAGS   := -g
 
-arp-spoofing: main.o packet.o sysinfo.o
-	g++ -g -o arp-spoofing main.o packet.o sysinfo.o -lpcap
 
-main.o: main.cpp
-	g++ -g -c -o main.o main.cpp
+TARGET  := arp-spoofing
+OBJECTS := $(patsubst %cpp,%o,$(wildcard src/*.cpp)) $(patsubst %c,%o,$(wildcard src/*.c))
+HEADERS := $(wildcard src/*.h)
 
-packet.o: packet.cpp packet.h
-	g++ -g -c -o packet.o packet.cpp
+$(TARGET): $(OBJECTS)
+	$(CC) -o $(TARGET) $(OBJECTS) $(LDLIBS)
 
-sysinfo.o: sysinfo.cpp sysinfo.h
-	g++ -g -c -o sysinfo.o sysinfo.cpp
+%.o: %.cpp $(HEADERS)
+	$(CC) $(CFLAGS) -c -o $@ $< 
 
+.PHONY: clean new
 clean:
-	rm -f arp-spoofing
-	rm -f *.o
+	rm -f $(OBJECTS) $(TARGET)
 
+new:
+	$(MAKE) clean
+	$(MAKE)
